@@ -1,18 +1,35 @@
-const mysql = require('mysql2');
+const pool = require('../config/db');
 
-const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'root',
-  database: 'community'
-});
+const User = {
+  async getAll() {
+    const [rows] = await pool.query('SELECT * FROM users');
+    return rows;
+  },
 
-connection.connect((err) => {
-  if (err) {
-    console.error('Erreur de connexion à la base de données:', err);
-  } else {
-    console.log('Connecté à la base de données MySQL');
+  async getById(id) {
+    const [rows] = await pool.query('SELECT * FROM users WHERE id = ?', [id]);
+    return rows[0];
+  },
+
+  async create({ name, phone, neighborhood }) {
+    const [result] = await pool.query(
+      'INSERT INTO users (name, phone, neighborhood) VALUES (?, ?, ?)',
+      [name, phone, neighborhood]
+    );
+    return this.getById(result.insertId);
+  },
+
+  async update(id, { name, phone, neighborhood }) {
+    await pool.query(
+      'UPDATE users SET name = ?, phone = ?, neighborhood = ? WHERE id = ?',
+      [name, phone, neighborhood, id]
+    );
+    return this.getById(id);
+  },
+
+  async delete(id) {
+    await pool.query('DELETE FROM users WHERE id = ?', [id]);
   }
-});
+};
 
-module.exports = connection;
+module.exports = User;

@@ -1,23 +1,22 @@
+require('dotenv').config();
 const express = require('express');
-const userRoutes = require('./routes/userRoutes');
-require('dotenv').config(); // Charger les variables d'environnement
-
 const app = express();
-const PORT = process.env.PORT || 3000; // Utiliser la variable d'environnement
 
-// Middleware pour parser le corps des requêtes en JSON
+// Middlewares de base
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Routes
-app.use('/users', userRoutes);
+app.use('/api/users', require('./routes/userRoutes'));
 
-// Middleware pour la gestion des erreurs
+// Gestion des erreurs
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ error: 'Erreur interne du serveur' });
+  res.status(500).json({ error: 'Something went wrong!' });
 });
 
 // Démarrer le serveur
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Serveur démarré sur http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
